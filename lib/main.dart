@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';  
+import 'package:flutter/cupertino.dart';     
 
 void main() {
   runApp(new FriendlychatApp());
@@ -9,6 +11,9 @@ class FriendlychatApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: "Friendlychat",
+      theme: defaultTargetPlatform == TargetPlatform.iOS         //new
+        ? kIOSTheme                                              //new
+        : kDefaultTheme,
       home: new ChatScreen(),
     );
   }
@@ -25,11 +30,16 @@ class ChatScreen extends StatefulWidget {                     //modified
 class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin { // modified
   final List<ChatMessage> _messages = <ChatMessage>[];
   final TextEditingController _textController = new TextEditingController();
-
-  @override                                                        //new
+  bool _isComposing = false;                                      //new
+         
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text("Friendlychat")),
+      appBar: new AppBar(
+        title: new Text("Friendlychat"),                                 //modified
+        elevation:
+          Theme.of(context).platform == TargetPlatform.iOS ? 0.0 : 4.0, //new
+      ),
       body: new Column(                                        //modified
         children: <Widget>[                                         //new
           new Flexible(                                             //new
@@ -61,6 +71,11 @@ class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin { 
             new Flexible(
               child: new TextField(
                 controller: _textController,
+                onChanged: (String text) {          //new
+                  setState(() {                     //new
+                    _isComposing = text.length > 0; //new
+                  });                               //new
+                }, 
                 onSubmitted: _handleSubmitted,
                 decoration: new InputDecoration.collapsed(
                   hintText: "Send a message"),
@@ -68,9 +83,17 @@ class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin { 
             ),
             new Container(
               margin: new EdgeInsets.symmetric(horizontal: 4.0),
-              child: new IconButton(
-                icon: new Icon(Icons.send),
-                onPressed: () => _handleSubmitted(_textController.text)),
+              child: Theme.of(context).platform == TargetPlatform.iOS ?  //modified
+                new CupertinoButton(                                       //new
+                  child: new Text("Send"),                                 //new
+                  onPressed: _isComposing                                  //new
+                      ? () =>  _handleSubmitted(_textController.text)      //new
+                      : null,) :                                           //new
+                new IconButton(                                            //modified
+                    icon: new Icon(Icons.send),
+                    onPressed: _isComposing ?
+                        () =>  _handleSubmitted(_textController.text) : null,
+                    )
             ),
           ],
         ),
@@ -80,6 +103,9 @@ class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin { 
 
   void _handleSubmitted(String text) {
     _textController.clear();
+    setState(() {                                                    //new
+      _isComposing = false;                                          //new
+    });  
     ChatMessage message = new ChatMessage(
       text: text,
       animationController: new AnimationController(                  //new
@@ -120,15 +146,17 @@ class ChatMessage extends StatelessWidget {
               margin: const EdgeInsets.only(right: 16.0),
               child: new CircleAvatar(child: new Text(_name[0])),
             ),
-            new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Text(_name, style: Theme.of(context).textTheme.subhead),
-                new Container(
-                  margin: const EdgeInsets.only(top: 5.0),
-                  child: new Text(text),
-                ),
-              ],
+            new Expanded(
+              child: new Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  new Text(_name, style: Theme.of(context).textTheme.subhead),
+                  new Container(
+                    margin: const EdgeInsets.only(top: 5.0),
+                    child: new Text(text),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -138,3 +166,15 @@ class ChatMessage extends StatelessWidget {
 }
 
 const String _name = "Your Name";
+
+
+final ThemeData kIOSTheme = new ThemeData(
+  primarySwatch: Colors.orange,
+  primaryColor: Colors.grey[100],
+  primaryColorBrightness: Brightness.light,
+);
+
+final ThemeData kDefaultTheme = new ThemeData(
+  primarySwatch: Colors.purple,
+  accentColor: Colors.orangeAccent[400],
+);
