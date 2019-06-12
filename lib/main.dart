@@ -36,28 +36,34 @@ class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin { 
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Friendlychat"),                                 //modified
-        elevation:
-          Theme.of(context).platform == TargetPlatform.iOS ? 0.0 : 4.0, //new
-      ),
-      body: new Column(                                        //modified
-        children: <Widget>[                                         //new
-          new Flexible(                                             //new
-            child: new ListView.builder(                            //new 
-              padding: new EdgeInsets.all(8.0),                     //new
-              reverse: true,                                        //new
-              itemBuilder: (_, int index) => _messages[index],      //new
-              itemCount: _messages.length,                          //new
-            ),                                                      //new
-          ),                                                        //new
-          new Divider(height: 1.0),                                 //new
-          new Container(                                            //new
-            decoration: new BoxDecoration(
-              color: Theme.of(context).cardColor),                  //new
-            child: _buildTextComposer(),                       //modified
-          ),                                                        //new
-        ],                                                          //new
-      ),                                                            //new
+          title: new Text("Friendlychat"),
+          elevation:
+              Theme.of(context).platform == TargetPlatform.iOS ? 0.0 : 4.0),
+      body: new Container(                                             //modified
+          child: new Column(                                           //modified
+            children: <Widget>[
+              new Flexible(
+                child: new ListView.builder(
+                  padding: new EdgeInsets.all(8.0),
+                  reverse: true,
+                  itemBuilder: (_, int index) => _messages[index],
+                  itemCount: _messages.length,
+                ),
+              ),
+              new Divider(height: 1.0),
+              new Container(
+                decoration: new BoxDecoration(color: Theme.of(context).cardColor),
+                child: _buildTextComposer(),
+              ),
+            ],
+          ),
+          decoration: Theme.of(context).platform == TargetPlatform.iOS //new
+              ? new BoxDecoration(                                     //new
+                  border: new Border(                                  //new
+                    top: new BorderSide(color: Colors.grey[200]),      //new
+                  ),                                                   //new
+                )                                                      //new
+              : null),                                                 //modified
     );
   }
 
